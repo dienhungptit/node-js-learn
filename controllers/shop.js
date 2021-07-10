@@ -10,6 +10,7 @@ exports.getProducts = (req, res, next) => {
                 prods: products,
                 pageTitle: "All Products",
                 path: "/products",
+                isAuthenticated: req.isLoggedIn
             });
         })
         .catch((err) => {
@@ -22,9 +23,9 @@ exports.getProduct = (req, res, next) => {
   Product.findById(prodId)
     .then((product) => {
       res.render("shop/product-detail", {
-        product: product,
-        pageTitle: product.title,
-        path: "/products",
+          product: product,
+          pageTitle: product.title,
+          path: "/products", isAuthenticated: req.isLoggedIn
       });
     })
     .catch((err) => console.log(err));
@@ -37,6 +38,7 @@ exports.getIndex = (req, res, next) => {
         prods: products,
         pageTitle: "Shop",
         path: "/",
+          isAuthenticated: req.isLoggedIn
       });
     })
     .catch((err) => {
@@ -45,6 +47,7 @@ exports.getIndex = (req, res, next) => {
 };
 
 exports.getCart = (req, res, next) => {
+    console.log('req.user', req.user)
     req.user
         .populate('cart.items.productId').execPopulate()
         .then((user) => {
@@ -52,7 +55,7 @@ exports.getCart = (req, res, next) => {
             res.render("shop/cart", {
                 path: "/cart",
                 pageTitle: "Your Cart",
-                products: products,
+                products: products, isAuthenticated: req.isLoggedIn
             });
         })
         .catch((err) => console.log(err));
@@ -93,7 +96,7 @@ exports.postOrder = (req, res, next) => {
                         name: req.user.name,
                         userId: req.user
                     },
-                    productId: products
+                products: products
 
 
                 }
@@ -108,14 +111,13 @@ exports.postOrder = (req, res, next) => {
 };
 
 exports.getOrders = (req, res, next) => {
-  req.user
-    .getOrders()
+    Order.find({"user.userId": req.user._id})
     .then((orders) => {
-      res.render("shop/orders", {
-        path: "/orders",
-        pageTitle: "Your Orders",
-        orders: orders,
-      });
+        res.render("shop/orders", {
+            path: "/orders",
+            pageTitle: "Your Orders",
+            orders: orders, isAuthenticated: req.isLoggedIn
+        });
     })
     .catch((err) => console.log(err));
 };
